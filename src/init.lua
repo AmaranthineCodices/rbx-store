@@ -6,4 +6,8 @@ local lib = {}
 lib.Store = require(script.Store)
 lib.logger = require(script.loggerPlugin)
 
+if script.Parent:FindFirstChild("Roact") then
+	lib.RoactBridge = require(script.RoactBridge)
+end
+
 return lib
