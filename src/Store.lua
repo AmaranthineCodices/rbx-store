@@ -97,7 +97,7 @@ function Store:commit(mutationName, payload)
 		mutator(payload, self.state)
 
 		-- Invoke all subscribers asynchronously.
-		for _, subscriber in ipairs(self._subscribers) do
+		for _, subscriber in pairs(self._subscribers) do
 			spawn(function()
 				subscriber(mutationName, payload)
 			end)
@@ -212,9 +212,25 @@ end
 	mutation's payload. It will not receive a reference to the state
 	of the Store.
 
+	This function returns a handle that can be used to unsubscribe
+	from the store with unsubscribe().
+
 ]]
 function Store:subscribe(subscriber)
-	table.insert(self._subscribers, subscriber)
+	local handle = newproxy()
+	self._subscribers[handle] = subscriber
+
+	return handle
+end
+
+--[[
+
+	Unsubscribes a function from the store using the handle returned
+	by subscribe().
+
+]]
+function Store:unsubscribe(handle)
+	self._subscribers[handle] = nil
 end
 
 return Store
