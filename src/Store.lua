@@ -95,13 +95,6 @@ function Store:commit(mutationName, payload)
 
 		-- State will be mutated; pass-by-ref.
 		mutator(payload, self.state)
-
-		-- Invoke all subscribers asynchronously.
-		for _, subscriber in pairs(self._subscribers) do
-			spawn(function()
-				subscriber(mutationName, payload)
-			end)
-		end
 	-- If it contains a / character it's targeting a module.
 	elseif mutationName:match("/") then
 		-- Modules are Stores themselves. We only care about the module name; the module will deal with the rest.
@@ -115,6 +108,13 @@ function Store:commit(mutationName, payload)
 		end
 	else
 		error(("Could not commit a mutation of name %q: there is no mutator function."):format(mutationName), 0)
+	end
+
+	-- Invoke all subscribers asynchronously.
+	for _, subscriber in pairs(self._subscribers) do
+		spawn(function()
+			subscriber(mutationName, payload)
+		end)
 	end
 end
 
