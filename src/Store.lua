@@ -95,6 +95,13 @@ function Store:commit(mutationName, payload)
 
 		-- State will be mutated; pass-by-ref.
 		mutator(payload, self.state)
+
+		-- Invoke all subscribers asynchronously.
+		for _, subscriber in pairs(self._subscribers) do
+			spawn(function()
+				subscriber(mutationName, payload)
+			end)
+		end
 	-- If it contains a / character it's targeting a module.
 	elseif mutationName:match("/") then
 		-- Modules are Stores themselves. We only care about the module name; the module will deal with the rest.
@@ -108,13 +115,6 @@ function Store:commit(mutationName, payload)
 		end
 	else
 		error(("Could not commit a mutation of name %q: there is no mutator function."):format(mutationName), 0)
-	end
-
-	-- Invoke all subscribers asynchronously.
-	for _, subscriber in pairs(self._subscribers) do
-		spawn(function()
-			subscriber(mutationName, payload)
-		end)
 	end
 end
 
@@ -203,6 +203,10 @@ function Store:snapshot()
 	return deepCopy(self.state)
 end
 
+function Store:_subscribeInternal(subscriber, handle)
+	self._subscribers[handle] = subscriber
+end
+
 --[[
 
 	Subscribes to changes to the store.
@@ -218,7 +222,12 @@ end
 ]]
 function Store:subscribe(subscriber)
 	local handle = newproxy()
-	self._subscribers[handle] = subscriber
+	self:_subscribeInternal(subscriber, handle)
+
+	-- For every child module, we also need to subscribe there.
+	for _, module in pairs(self.modules) do
+		module:_subscribeInternal(subscriber, handle)
+	end
 
 	return handle
 end
