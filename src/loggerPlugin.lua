@@ -19,6 +19,7 @@ local function prettyPrint(t, indent)
 
 		if type(value) == "table" then
 			table.insert(outputBuffer, prettyPrint(value, indent + 1))
+			table.insert(outputBuffer, "\n")
 		else
 			table.insert(outputBuffer, tostring(value))
 			table.insert(outputBuffer, "; (")
