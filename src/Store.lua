@@ -71,18 +71,7 @@ function Store.new(props)
 	return self
 end
 
---[[
-
-	Commits a mutation.
-	Mutations alter the store's state. This has the following additional effects:
-	* The internal getter cache is cleared.
-	* All subscribers are invoked.
-
-	This function will throw if `mutationName` does not correspond to a mutation
-	in the store's own mutations table or to a mutation in a child store.
-
-]]
-function Store:commit(mutationName, payload)
+function Store:_commitInternal(mutationName, payload)
 	-- Do we have a direct match for the mutator?
 	local mutator = self.mutations[mutationName]
 
@@ -95,13 +84,6 @@ function Store:commit(mutationName, payload)
 
 		-- State will be mutated; pass-by-ref.
 		mutator(payload, self.state)
-
-		-- Invoke all subscribers asynchronously.
-		for _, subscriber in pairs(self._subscribers) do
-			spawn(function()
-				subscriber(mutationName, payload)
-			end)
-		end
 	-- If it contains a / character it's targeting a module.
 	elseif mutationName:match("/") then
 		-- Modules are Stores themselves. We only care about the module name; the module will deal with the rest.
@@ -109,12 +91,35 @@ function Store:commit(mutationName, payload)
 		local module = self.modules[moduleName]
 
 		if module then
-			module:commit(remainder, payload)
+			module:_commitInternal(remainder, payload)
 		else
 			error(("No module %q in this Store"):format(moduleName), 0)
 		end
 	else
 		error(("Could not commit a mutation of name %q: there is no mutator function."):format(mutationName), 0)
+	end
+end
+
+--[[
+
+	Commits a mutation.
+	Mutations alter the store's state. This has the following additional effects:
+	* The internal getter cache is cleared.
+	* All subscribers are invoked.
+
+	This function will throw if `mutationName` does not correspond to a mutation
+	in the store's own mutations table or to a mutation in a child store.
+
+]]
+function Store:commit(mutationName, payload)
+	self:_commitInternal(mutationName, payload)
+
+	-- This is after the commit has happened.
+	-- Invoke all subscribers asynchronously.
+	for _, subscriber in pairs(self._subscribers) do
+		spawn(function()
+			subscriber(mutationName, payload)
+		end)
 	end
 end
 
