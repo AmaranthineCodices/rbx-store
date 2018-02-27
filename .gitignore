@@ -2,3 +2,6 @@ rojo.json
 *.rbxl
 
 lib/
+
+installer.lua
+site/
