@@ -1,0 +1,56 @@
+site_name: 'rbx-store documentation'
+site_description: 'Documentation for rbx-store'
+site_url: 'https://rbxstore.amaranthinecodices.me/'
+
+repo_name: 'AmaranthineCodices/rbx-store'
+repo_url: 'https://github.com/AmaranthineCodices/rbx-store'
+
+pages:
+  - Home: 'index.md'
+  - 'Getting Started': 'gettingstarted.md'
+  - Concepts:
+    - 'State': 'concepts/state.md'
+    - 'Mutations': 'concepts/mutations.md'
+    - 'Actions': 'concepts/actions.md'
+    - 'Getters': 'concepts/getters.md'
+    - 'Modules': 'concepts/modules.md'
+    - 'Plugins': 'concepts/plugins.md'
+  - Roact: 'roact.md'
+  - 'API Reference':
+    - 'Store': 'api/store.md'
+    - 'RoactBridge': 'api/roactbridge.md'
+
+extra:
+  social:
+    - type: 'github'
+      link: 'https://github.com/AmaranthineCodices/'
+    - type: 'twitter'
+      link: 'https://twitter.com/prolificlexicon'
+
+theme:
+  name: 'material'
+  logo:
+    icon: 'description'
+  palette:
+    primary: 'deep purple'
+    accent: 'cyan'
+
+markdown_extensions:
+  - admonition
+  - codehilite:
+      guess_lang: false
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
