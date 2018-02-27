@@ -36,39 +36,41 @@ function RoactBridge.StoreProvider:render()
 	return Roact.oneChild(self.props[Roact.Children])
 end
 
-function RoactBridge.connect(computeProps, component)
-	local wrappedComponent = Roact.Component:extend(("RbxStoreConnectionFor(%s)"):format(tostring(component)))
+function RoactBridge.connect(computeProps)
+	return function(component)
+		local wrappedComponent = Roact.Component:extend(("RbxStoreConnectionFor(%s)"):format(tostring(component)))
 
-	function wrappedComponent:init()
-		local store = self._context[storeKey]
+		function wrappedComponent:init()
+			local store = self._context[storeKey]
 
-		if not store then
-			error("There is no store available (did you forget to wrap your root component in a RoactBridge.StoreProvider?)", 0)
+			if not store then
+				error("There is no store available (did you forget to wrap your root component in a RoactBridge.StoreProvider?)", 0)
+			end
+
+			self.store = store
+			self.state = {
+				propsFromStore = computeProps(store)
+			}
 		end
 
-		self.store = store
-		self.state = {
-			propsFromStore = computeProps(store)
-		}
-	end
+		function wrappedComponent:didMount()
+			self.subscriptionHandle = self.store:subscribe(function()
+				self:setState({
+					propsFromStore = computeProps(self.store)
+				})
+			end)
+		end
 
-	function wrappedComponent:didMount()
-		self.subscriptionHandle = self.store:subscribe(function()
-			self:setState({
-				propsFromStore = computeProps(self.store)
-			})
-		end)
-	end
+		function wrappedComponent:willUnmount()
+			self.store:unsubscribe(self.subscriptionHandle)
+		end
 
-	function wrappedComponent:willUnmount()
-		self.store:unsubscribe(self.subscriptionHandle)
-	end
+		function wrappedComponent:render()
+			return Roact.createElement(component, mergeTables(self.props, self.state.propsFromStore))
+		end
 
-	function wrappedComponent:render()
-		return Roact.createElement(component, mergeTables(self.props, self.state.propsFromStore))
+		return wrappedComponent
 	end
-
-	return wrappedComponent
 end
 
 return RoactBridge
