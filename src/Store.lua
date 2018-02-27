@@ -145,7 +145,7 @@ function Store:dispatch(actionName, payload)
 		spawn(function()
 			-- For simplicity, just pass the store to it.
 			-- In the future this should really just be a `commit` function, but whatever.
-			action(self, payload)
+			action(payload, self)
 		end)
 	-- If it contains a / character it's targeting a module.
 	elseif actionName:match("/") then
