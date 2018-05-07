@@ -1,3 +1,6 @@
+# Do not use for new work
+rbx-store's primary principle, that you can commit mutations to state instead of replacing the state tree with every update, is fundamentally flawed. Use [Rodux](https://github.com/Roblox/rodux) instead.
+
 # rbx-store
 
 A central state manager for Roblox patterned after [Vuex](github.com/vuejs/vuex).
